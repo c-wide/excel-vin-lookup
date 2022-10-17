@@ -1,4 +1,4 @@
-module vin-lookup
+module github.com/c-wide/vin-lookup
 
 go 1.18
 

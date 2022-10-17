@@ -5,8 +5,8 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
-	"vin-lookup/internal/lookup"
 
+	"github.com/c-wide/vin-lookup/internal/lookup"
 	"github.com/xuri/excelize/v2"
 )
 

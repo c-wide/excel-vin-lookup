@@ -3,8 +3,9 @@ package main
 import (
 	"fmt"
 	"os"
-	"vin-lookup/internal/excel"
-	"vin-lookup/internal/lookup"
+
+	"github.com/c-wide/vin-lookup/internal/excel"
+	"github.com/c-wide/vin-lookup/internal/lookup"
 )
 
 func main() {
