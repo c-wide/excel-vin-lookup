@@ -6,11 +6,11 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/c-wide/vin-lookup/internal/lookup"
+	"github.com/c-wide/go-nhtsa"
 	"github.com/xuri/excelize/v2"
 )
 
-func ProcessFile(filePath string) (*[]lookup.VinInfo, error) {
+func ProcessFile(filePath string) (*[]nhtsa.VinRequest, error) {
 	f, err := excelize.OpenFile(filePath)
 	if err != nil {
 		return nil, fmt.Errorf("error opening file.\npath: %s\nerror: %s", filePath, err)
@@ -32,7 +32,7 @@ func ProcessFile(filePath string) (*[]lookup.VinInfo, error) {
 		return nil, fmt.Errorf("error creating regex. %s", err)
 	}
 
-	vinInfoList := []lookup.VinInfo{}
+	vList := make([]nhtsa.VinRequest, len(rows))
 
 	for rowIdx, row := range rows {
 		rowLen := len(row)
@@ -56,13 +56,13 @@ func ProcessFile(filePath string) (*[]lookup.VinInfo, error) {
 			}
 		}
 
-		vinInfoList = append(vinInfoList, lookup.VinInfo{Vin: strings.Trim(row[0], " "), Year: year})
+		vList[rowIdx] = nhtsa.VinRequest{Vin: strings.Trim(row[0], " "), Year: year}
 	}
 
-	return &vinInfoList, nil
+	return &vList, nil
 }
 
-func WriteFile(data *[]lookup.VinInfo, filePath string) error {
+func WriteFile(vReqs *[]nhtsa.VinRequest, vData *[]nhtsa.DecodeFlatResult, filePath string) error {
 	f := excelize.NewFile()
 
 	index := f.NewSheet("Sheet1")
@@ -75,7 +75,9 @@ func WriteFile(data *[]lookup.VinInfo, filePath string) error {
 		return fmt.Errorf("error creating cell style. %s", err)
 	}
 
-	for vIdx, vin := range *data {
+	reqs := *vReqs
+
+	for vIdx, vin := range *vData {
 		tgtIdx := vIdx + 1
 
 		rowTgt := map[string]string{
@@ -84,15 +86,11 @@ func WriteFile(data *[]lookup.VinInfo, filePath string) error {
 			"c": fmt.Sprintf("C%d", tgtIdx),
 		}
 
-		f.SetCellValue("Sheet1", rowTgt["a"], vin.Vin)
-		f.SetCellValue("Sheet1", rowTgt["b"], vin.Year)
+		f.SetCellValue("Sheet1", rowTgt["a"], reqs[vIdx].Vin)
+		f.SetCellValue("Sheet1", rowTgt["b"], reqs[vIdx].Year)
 
-		if vin.Result == nil {
-			return fmt.Errorf("result is nil for VIN %s", vin.Vin)
-		}
-
-		if vin.Result.ErrorCode != "0" {
-			f.SetCellValue("Sheet1", rowTgt["c"], vin.Result.ErrorText)
+		if vin.ErrorCode != "0" {
+			f.SetCellValue("Sheet1", rowTgt["c"], vin.ErrorText)
 
 			for _, row := range rowTgt {
 				if err := f.SetCellStyle("Sheet1", row, row, style); err != nil {
@@ -103,7 +101,7 @@ func WriteFile(data *[]lookup.VinInfo, filePath string) error {
 			continue
 		}
 
-		f.SetCellValue("Sheet1", rowTgt["c"], vin.Result.Gvwr)
+		f.SetCellValue("Sheet1", rowTgt["c"], vin.GVWR)
 	}
 
 	basePath := filepath.Base(filePath)

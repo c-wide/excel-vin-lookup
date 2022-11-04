@@ -3,8 +3,8 @@ module github.com/c-wide/vin-lookup
 go 1.18
 
 require (
+	github.com/c-wide/go-nhtsa v0.2.0
 	github.com/xuri/excelize/v2 v2.6.1
-	golang.org/x/sync v0.0.0-20220929204114-8fcdb60fdcc0
 )
 
 require (
@@ -15,5 +15,6 @@ require (
 	github.com/xuri/nfp v0.0.0-20220409054826-5e722a1d9e22 // indirect
 	golang.org/x/crypto v0.0.0-20220817201139-bc19a97f63c8 // indirect
 	golang.org/x/net v0.0.0-20220812174116-3211cb980234 // indirect
+	golang.org/x/sync v0.1.0 // indirect
 	golang.org/x/text v0.3.7 // indirect
 )

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/c-wide/go-nhtsa"
 	"github.com/c-wide/vin-lookup/internal/excel"
-	"github.com/c-wide/vin-lookup/internal/lookup"
 )
 
 func main() {
@@ -17,18 +17,19 @@ func main() {
 		os.Exit(1)
 	}
 
-	data, err := excel.ProcessFile(os.Args[1])
+	vReqs, err := excel.ProcessFile(os.Args[1])
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
 
-	if err := lookup.RequestVinInfo(data); err != nil {
+	vData, err := nhtsa.DecodeVinBatch(vReqs)
+	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
 
-	if err := excel.WriteFile(data, os.Args[1]); err != nil {
+	if err := excel.WriteFile(vReqs, vData, os.Args[1]); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
